@@ -1,0 +1,3 @@
+from playwright.sync_api import Page
+
+class PageContext(Page): ...

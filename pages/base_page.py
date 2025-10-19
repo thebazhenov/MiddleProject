@@ -1,19 +1,23 @@
-from playwright.sync_api import expect, Page
-from pages.page_components import PageComponents
+from pages.components.layout_menu_components import LayoutMenuComponents
+from context.page_context import PageContext
+from playwright.sync_api import expect
+
 
 class BasePage:
-    def __init__(self, page: Page, path: str, query_params: dict | None = None):
+    def __init__(self, page: PageContext, path: str, query_params: dict | None = None):
         self.page = page
         self.path = path
         self.query_params = query_params
-        self.expect = expect
+        self._expect = expect(self.page)
 
     @property
-    def page_components(self) -> PageComponents:
-        return PageComponents(self.page)
+    def layout_menu(self) -> LayoutMenuComponents:
+        return LayoutMenuComponents(self.page)
 
-    def expect(self, *args, **kwargs):
-        return self.expect(*args, **kwargs)
+    @property
+    def expect(self):
+        """Доступ к expect через свойство"""
+        return self._expect
 
     def locator(self, selector):
         return self.page.locator(selector)
@@ -33,10 +37,19 @@ class BasePage:
         )
         return f"{self.path}?{search_params}"
 
-    def goto(self) -> None:
-        self.page.goto(self._build_url())
+    def open(self) -> None:
+        url = self._build_url()
+        self.page.goto(url)
+        expect(self.page).to_have_url(url)
 
-    def verify_url(self, query_params: dict | None = None) -> None:
+    def verify_url(self, query_params: dict | None = None, timeout: float = 5000) -> None:
         if query_params:
             self.query_params = query_params
-        expect(self.page).to_have_url(self._build_url())
+        self._expect.to_have_url(self._build_url(), timeout=timeout)
+
+    def verify_url_not_changed(self, original_url: str = None) -> None:
+        """Проверяет, что URL не изменился"""
+        if original_url is None:
+            # Если URL не передан, используем текущий построенный URL
+            original_url = self._build_url()
+        self._expect.to_have_url(original_url)

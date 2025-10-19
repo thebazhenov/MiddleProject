@@ -1,6 +1,6 @@
-import time
-import allure
 from pages.base_page import BasePage
+from pages.elements.button import Button
+
 
 class LoginPage(BasePage):
     def __init__(self, page):
@@ -21,5 +21,5 @@ class LoginPage(BasePage):
     def login(self, username: str, password: str):
         self.login_field.fill(username)
         self.password_field.fill(password)
-        self.submit_button.click()
-
+        Button(self.submit_button).verify_enabled()
+        Button(self.submit_button).click()
