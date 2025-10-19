@@ -1,16 +1,25 @@
 import time
 import allure
-from base_page import BasePage, PageContext
-
+from pages.base_page import BasePage
 
 class LoginPage(BasePage):
-    def __init__(self, page: PageContext):
-        super().__init__(page)  # Вызываем конструктор базового класса
-        self.login_field = "rcmloginuser"
-        self.password_field = "rcmloginpwd"
+    def __init__(self, page):
+        super().__init__(page, "/")  # Вызываем конструктор базового класса
 
-    @allure.step("Write login")
-    def write_login(self):
-        self.page.type(selector=self.login_field, text="test@localhost.com")
+    @property
+    def login_field(self):
+        return self.locator("#rcmloginuser")
 
+    @property
+    def password_field(self):
+        return self.locator("#rcmloginpwd")
+
+    @property
+    def submit_button(self):
+        return self.locator("#rcmloginsubmit")
+
+    def login(self, username: str, password: str):
+        self.login_field.fill(username)
+        self.password_field.fill(password)
+        self.submit_button.click()
 
